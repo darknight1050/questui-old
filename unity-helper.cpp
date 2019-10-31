@@ -6,6 +6,32 @@ namespace UnityHelper {
     bool boolTrue = true;
     bool boolFalse = false;
 
+    std::vector<Il2CppObject*> FindGameObjectsWithTag(IL2CPP_Helper* helper, char* name){
+        std::vector<Il2CppObject*> componentsFound;
+        Array<Il2CppObject*>* objects;
+        const MethodInfo* gameObject_FindGameObjectsWithTagMethod = helper->class_get_method_from_name(helper->GetClassFromName("UnityEngine", "GameObject"), "FindGameObjectsWithTag", 1);
+        helper->RunMethod(&objects, nullptr, gameObject_FindGameObjectsWithTagMethod, helper->createcsstr(name));
+        for(int i = 0;i<objects->Length();i++){
+            componentsFound.push_back(objects->values[i]);
+        }
+        return componentsFound;
+    }
+
+    Il2CppObject* FindGameObjectWithTag(IL2CPP_Helper* helper, char* name){
+        std::vector<Il2CppObject*> componentsFound = FindGameObjectsWithTag(helper, name);
+        if(componentsFound.size() > 0){
+            return componentsFound[0];
+        }
+        return nullptr;
+    } 
+
+    Il2CppObject* FindGameObject(IL2CPP_Helper* helper, char* name){
+        Il2CppObject* object;
+        const MethodInfo* gameObject_FindMethod = helper->class_get_method_from_name(helper->GetClassFromName("UnityEngine", "GameObject"), "Find", 1);
+        helper->RunMethod(&object, nullptr, gameObject_FindMethod, helper->createcsstr(name));
+        return object;
+    }
+  
     std::vector<Il2CppObject*> GetComponentsInParent(IL2CPP_Helper* helper, Il2CppObject* parentObject, Il2CppClass* klass, char* name){
         std::vector<Il2CppObject*> componentsFound;
         Array<Il2CppObject*>* objects;
@@ -25,18 +51,9 @@ namespace UnityHelper {
     }
 
     Il2CppObject* GetComponentInParent(IL2CPP_Helper* helper, Il2CppObject* parentObject, Il2CppClass* klass, char* name){
-        Array<Il2CppObject*>* objects;
-        helper->RunMethod(&objects, parentObject, "GetComponentsInParent", helper->type_get_object(helper->class_get_type(klass)), &boolTrue);
-        for(int i = 0;i<objects->Length();i++){
-            Il2CppObject* object = objects->values[i];
-            if(object != nullptr){
-                Il2CppString* nameObject;
-                helper->RunMethod(&nameObject, object, "get_name");
-                if (strcmp(to_utf8(csstrtostr(nameObject)).c_str(), name) == 0)
-                {
-                    return object;
-                }
-            }
+        std::vector<Il2CppObject*> componentsFound = GetComponentsInParent(helper, parentObject, klass, name);
+        if(componentsFound.size() > 0){
+            return componentsFound[0];
         }
         return nullptr;
     }
@@ -60,22 +77,17 @@ namespace UnityHelper {
     }
 
     Il2CppObject* GetComponentInChildren(IL2CPP_Helper* helper, Il2CppObject* parentObject, Il2CppClass* klass, char* name){
-        Array<Il2CppObject*>* objects;
-        helper->RunMethod(&objects, parentObject, "GetComponentsInChildren", helper->type_get_object(helper->class_get_type(klass)), &boolTrue);
-        for(int i = 0;i<objects->Length();i++){
-            Il2CppObject* object = objects->values[i];
-            if(object != nullptr){
-                Il2CppString* nameObject;
-                helper->RunMethod(&nameObject, object, "get_name");
-                if (strcmp(to_utf8(csstrtostr(nameObject)).c_str(), name) == 0)
-                {
-                    return object;
-                }
-            }
+        std::vector<Il2CppObject*> componentsFound = GetComponentsInChildren(helper, parentObject, klass, name);
+        if(componentsFound.size() > 0){
+            return componentsFound[0];
         }
         return nullptr;
     }
 
+    void DontDestroyOnLoad(IL2CPP_Helper* helper, Il2CppObject* object){
+        helper->RunStaticMethod(object, "DontDestroyOnLoad", object);
+    }
+   
     void SetActive(IL2CPP_Helper* helper, Il2CppObject* object, bool active){
         helper->RunMethod(object, "SetActive", &active);
     }
@@ -103,7 +115,7 @@ namespace UnityHelper {
         helper->RunMethod(objectTransform, "SetParent", parentTransform, &boolFalse);
     }
     
-    void AddButtonOnClick(IL2CPP_Helper* helper, Il2CppObject* buttonBinder, Il2CppObject* customUIObject, char* name, void* handler){
+    void AddButtonOnClick(IL2CPP_Helper* helper, Il2CppObject* buttonBinder, Il2CppObject* customUIObject, char* name, ButtonOnClickFunction* handler){
         std::vector<Il2CppObject*> customUIButtons = GetComponentsInChildren(helper, customUIObject, helper->GetClassFromName("UnityEngine.UI", "Button"), name);
         for(Il2CppObject* customUIButton : customUIButtons){
             auto action = helper->MakeAction(customUIButton, handler, helper->class_get_type(helper->GetClassFromName("System", "Action")));
@@ -111,7 +123,7 @@ namespace UnityHelper {
         }
     }
 
-    void AddButtonOnClick(IL2CPP_Helper* helper, Il2CppObject* buttonBinder, Il2CppObject* button, void* handler){
+    void AddButtonOnClick(IL2CPP_Helper* helper, Il2CppObject* buttonBinder, Il2CppObject* button, ButtonOnClickFunction* handler){
         auto action = helper->MakeAction(button, handler, helper->class_get_type(helper->GetClassFromName("System", "Action")));
         helper->RunMethod(buttonBinder, "AddBinding", button, action);
     }

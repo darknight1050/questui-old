@@ -1,25 +1,31 @@
 #include "unityasset-loader.hpp"
+#include "unity-helper.hpp"
+#include <fstream>
 
 namespace UnityAssetLoader {
 
+    static bool boolTrue = true;
+    static bool boolFalse = false;
+
     static IL2CPP_Helper* helper = nullptr;
 
-    static UnityAssetLoader_OnFinishFunction* onFinish = nullptr;
+    static UnityAssetLoader_OnLoadAssetBundleCompleteFunction* onLoadAssetBundleComplete = nullptr;
+    static UnityAssetLoader_OnLoadAssetCompleteFunction* onLoadAssetComplete = nullptr;
     static Il2CppObject* assetBundleCreateRequest = nullptr;
     static Il2CppObject* assetBundleRequest = nullptr;
-
-    void AssetBundleComplete(){
-        log(INFO, "UnityAssetLoader: AssetBundleComplete Called!");
+    
+    void AssetBundleRequestComplete(){
+        log(INFO, "UnityAssetLoader: AssetBundleRequestComplete Called!");
         Il2CppObject* customAsset;
         helper->RunMethod(&customAsset, assetBundleRequest, "get_asset");
         if(customAsset == nullptr){
             log(ERROR, "UnityAssetLoader: Couldn't get Asset");
-            onFinish = nullptr;
             return;
         }
-        onFinish(customAsset);
-        onFinish = nullptr;
-        log(INFO, "UnityAssetLoader: AssetBundleComplete Finished!");
+        onLoadAssetComplete(customAsset);
+        onLoadAssetComplete = nullptr;
+        helper->RunMethod(assetBundleRequest, "Finalize");
+        log(INFO, "UnityAssetLoader: AssetBundleRequestComplete Finished!");
     }
 
     void AssetBundleCreateRequestComplete(){
@@ -28,36 +34,50 @@ namespace UnityAssetLoader {
         helper->RunMethod(&customAssetBundle, assetBundleCreateRequest, "get_assetBundle");
         if(customAssetBundle == nullptr){
             log(ERROR, "UnityAssetLoader: Couldn't get AssetBundle");
-            onFinish = nullptr;
+            onLoadAssetBundleComplete = nullptr;
             return;
         }
-        helper->RunMethod(&assetBundleRequest, customAssetBundle, "LoadAssetAsync", helper->createcsstr("_customasset"), helper->type_get_object(helper->class_get_type(helper->GetClassFromName("UnityEngine", "GameObject"))));
-        if(assetBundleRequest == nullptr){
-            log(ERROR, "UnityAssetLoader: Couldn't run method LoadAssetAsync");
-            onFinish = nullptr;
-            return;
-        }
-        auto action = helper->MakeAction(nullptr, (void*)AssetBundleComplete, helper->class_get_type(helper->GetClassFromName("System", "Action")));
-        if(action == nullptr){
-            log(ERROR, "UnityAssetLoader: Couldn't make AssetBundleComplete Action");
-            onFinish = nullptr;
-            return;
-        }
-        if(!helper->SetFieldValue(assetBundleRequest, "m_completeCallback", action)){
-            log(ERROR, "UnityAssetLoader: Couldn't set AssetBundleComplete Action");
-            onFinish = nullptr;
-            return;
-        }
+        onLoadAssetBundleComplete(customAssetBundle);
+        onLoadAssetBundleComplete = nullptr;
+        helper->RunMethod(assetBundleCreateRequest, "Finalize");
         log(INFO, "UnityAssetLoader: AssetBundleCreateRequestComplete Finished!");
     }
 
-    bool LoadFromFileAsync(char* filePath, UnityAssetLoader_OnFinishFunction* onFinishCall){
+    bool LoadAssetFromAssetBundleAsync(Il2CppObject* assetBundle, UnityAssetLoader_OnLoadAssetCompleteFunction* onLoadAssetCompleteCall){
         if(helper == nullptr){
             helper = new IL2CPP_Helper();
             helper->Initialize();
         }
-        if(onFinish != nullptr){
+        if(onLoadAssetComplete != nullptr){
             log(ERROR, "UnityAssetLoader: Already Loading an Asset");
+            return false;
+        }
+        helper->RunMethod(&assetBundleRequest, assetBundle, "LoadAssetAsync", helper->createcsstr("_customasset"), helper->type_get_object(helper->class_get_type(helper->GetClassFromName("UnityEngine", "GameObject"))));
+        if(assetBundleRequest == nullptr){
+            log(ERROR, "UnityAssetLoader: Couldn't run method LoadAssetAsync");
+            return false;
+        }
+        helper->RunMethod(assetBundleRequest, "set_allowSceneActivation", &boolTrue);
+        auto action = helper->MakeAction(nullptr, (void*)AssetBundleRequestComplete, helper->class_get_type(helper->GetClassFromName("System", "Action")));
+        if(action == nullptr){
+            log(ERROR, "UnityAssetLoader: Couldn't make AssetBundleComplete Action");
+            return false;
+        }
+        if(!helper->SetFieldValue(assetBundleRequest, "m_completeCallback", action)){
+            log(ERROR, "UnityAssetLoader: Couldn't set AssetBundleComplete Action");
+            return false;
+        }
+        onLoadAssetComplete = onLoadAssetCompleteCall;
+        return true;
+    }
+        
+     bool LoadAssetBundleFromFileAsync(char* filePath, UnityAssetLoader_OnLoadAssetBundleCompleteFunction* onLoadAssetBundleCompleteCall){
+        if(helper == nullptr){
+            helper = new IL2CPP_Helper();
+            helper->Initialize();
+        }
+        if(onLoadAssetBundleComplete != nullptr){
+            log(ERROR, "UnityAssetLoader: Already Loading an AssetBundle");
             return false;
         }
         Il2CppClass* assetBundleClass = helper->GetClassFromName("UnityEngine", "AssetBundle");
@@ -75,6 +95,7 @@ namespace UnityAssetLoader {
             log(ERROR, "UnityAssetLoader: Couldn't run method LoadFromFileAsync");
             return false;
         }
+        helper->RunMethod(assetBundleCreateRequest, "set_allowSceneActivation", &boolTrue);
         auto action = helper->MakeAction(nullptr, AssetBundleCreateRequestComplete, helper->class_get_type(helper->GetClassFromName("System", "Action")));
         if(action == nullptr){
             log(ERROR, "UnityAssetLoader: Couldn't make AssetBundleCreateRequestComplete Action");
@@ -84,7 +105,7 @@ namespace UnityAssetLoader {
             log(ERROR, "UnityAssetLoader: Couldn't set AssetBundleCreateRequestComplete Action");
             return false;
         }
-        onFinish = onFinishCall;
+        onLoadAssetBundleComplete = onLoadAssetBundleCompleteCall;
         log(INFO, "UnityAssetLoader: Loading asset %s", filePath);
         return true;
     }

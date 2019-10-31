@@ -13,6 +13,8 @@ namespace QuestUI {
     static QuestUIInfo* questUIInfo;
     static QuestUIModInfo questUIModInfo;
 
+    static bool loadUI = false;
+
     static Il2CppObject* menuTransformParent = nullptr;
     static Il2CppObject* buttonBinder = nullptr;
     static Array<Il2CppObject*>* menuButtons = nullptr;
@@ -20,6 +22,7 @@ namespace QuestUI {
     static Il2CppObject* modsButton = nullptr;
     static Il2CppObject* assetLoaderFinishedButton = nullptr;
     static Il2CppObject* customUIObject = nullptr;
+    static Il2CppObject* assetBundle = nullptr;
 
     static Il2CppObject* buttonModsListUp = nullptr;
     static Il2CppObject* buttonModsListDown = nullptr;
@@ -36,7 +39,7 @@ namespace QuestUI {
                     UnityHelper::SetGameObjectActive(helper, menuButtons->values[i], !active);
             }
         }
-        if(!active){
+        if(!active && modsButton != nullptr){
             UnityHelper::SetButtonText(helper, modsButton, "Mods");
         }
     }
@@ -113,10 +116,9 @@ namespace QuestUI {
         ((void (*)(void)) modInfo->OnInitialized)();
     }
 
-    void AssetLoaderOnFinish(Il2CppObject* customUIAsset){
-        log(INFO, "QuestUI: AssetLoaderOnFinish Called!");
-
-        helper->RunMethod(&customUIObject, nullptr, helper->class_get_method_from_name(helper->GetClassFromName("UnityEngine", "Object"), "Instantiate", 1), customUIAsset);
+    void OnLoadAssetComplete(Il2CppObject* assetArg){
+        log(INFO, "QuestUI: OnLoadAssetComplete Called!");
+        helper->RunMethod(&customUIObject, nullptr, helper->class_get_method_from_name(helper->GetClassFromName("UnityEngine", "Object"), "Instantiate", 1), assetArg);
         helper->RunMethod(customUIObject, "set_name", helper->createcsstr("CustomUIObject"));
         helper->RunMethod(customUIObject, "SetActive", &boolFalse);
 
@@ -127,11 +129,9 @@ namespace QuestUI {
         buttonModsListUp = UnityHelper::GetComponentInChildren(helper, customUIObject, helper->GetClassFromName("UnityEngine.UI", "Button"), "ButtonModsListUp");
         buttonModsListDown = UnityHelper::GetComponentInChildren(helper, customUIObject, helper->GetClassFromName("UnityEngine.UI", "Button"), "ButtonModsListDown");
        
-        UnityHelper::AddButtonOnClick(helper, buttonBinder, customUIObject, "ButtonBack", (void*)ButtonBackOnClick);
-        UnityHelper::AddButtonOnClick(helper, buttonBinder, buttonModsListUp, (void*)ButtonModsListUpOnClick);
-        UnityHelper::AddButtonOnClick(helper, buttonBinder, buttonModsListDown, (void*)ButtonModsListDownOnClick);
-
-        log(INFO, "QuestUI: AssetLoaderOnFinish Finished!");
+        UnityHelper::AddButtonOnClick(helper, buttonBinder, customUIObject, "ButtonBack", (UnityHelper::ButtonOnClickFunction*)ButtonBackOnClick);
+        UnityHelper::AddButtonOnClick(helper, buttonBinder, buttonModsListUp, (UnityHelper::ButtonOnClickFunction*)ButtonModsListUpOnClick);
+        UnityHelper::AddButtonOnClick(helper, buttonBinder, buttonModsListDown, (UnityHelper::ButtonOnClickFunction*)ButtonModsListDownOnClick);
 
         if(questUIInfo != nullptr){
             delete questUIInfo->Mods;
@@ -149,7 +149,7 @@ namespace QuestUI {
         helper->RunMethod(&onClick, assetLoaderFinishedButton, "get_onClick");
         helper->RunMethod(onClick, "Invoke");
 
-        log(INFO, "QuestUI: %d Mods Loaded!", questUIInfo->Mods->size());
+        log(INFO, "QuestUI: %lu Mods Loaded!", questUIInfo->Mods->size());
 
         Il2CppObject* buttonMod_Template = UnityHelper::GetComponentInChildren(helper, customUIObject, helper->GetClassFromName("UnityEngine.UI", "Button"), "ButtonMod_Template");
         UnityHelper::SetGameObjectActive(helper, buttonMod_Template, false);
@@ -161,7 +161,7 @@ namespace QuestUI {
             helper->RunMethod(modInfo->Button, "set_name", helper->createcsstr("ButtonMod"));
             UnityHelper::SetSameParent(helper, modInfo->Button, buttonMod_Template);
 
-            UnityHelper::AddButtonOnClick(helper, buttonBinder, modInfo->Button, (void*)ButtonModOnClick);
+            UnityHelper::AddButtonOnClick(helper, buttonBinder, modInfo->Button, (UnityHelper::ButtonOnClickFunction*)ButtonModOnClick);
 
             helper->RunMethod(&modInfo->Panel, nullptr, helper->class_get_method_from_name(helper->GetClassFromName("UnityEngine", "Object"), "Instantiate", 1), panelMod_Template);
             helper->RunMethod(modInfo->Panel, "set_name", helper->createcsstr("PanelMod"));
@@ -176,10 +176,29 @@ namespace QuestUI {
            UnityHelper::SetGameObjectActive(helper, (*questUIInfo->Mods)[0]->Panel, true);
         }
         RefreshList();
+        log(INFO, "QuestUI: OnLoadAssetComplete Finished!");
+    }
+
+    void OnLoadAssetBundleComplete(Il2CppObject* assetBundleArg){
+        assetBundle = assetBundleArg;
+        UnityAssetLoader::LoadAssetFromAssetBundleAsync(assetBundle, (UnityAssetLoader_OnLoadAssetBundleCompleteFunction*)OnLoadAssetComplete);
+    }
+
+    MAKE_HOOK_OFFSETLESS(SceneManager_SetActiveScene, bool, int scene)
+    {
+        Il2CppString* nameObject;
+        helper->RunStaticMethod(&nameObject, helper->GetClassFromName("UnityEngine.SceneManagement", "Scene"), "GetNameInternal", &scene);
+        auto name = to_utf8(csstrtostr(nameObject)).c_str();
+        if(strcmp(name, "MenuCore") == 0){
+            loadUI = true;
+        }
+        return SceneManager_SetActiveScene(scene);
     }
 
     MAKE_HOOK_OFFSETLESS(MainMenuViewController_DidActivate, void, Il2CppObject* self, bool firstActivation, int type){
-        if(firstActivation){
+        if(loadUI){
+            loadUI = false;
+            customUIObject = nullptr;
             Il2CppObject* settingsButton = helper->GetFieldObjectValue(self, "_settingsButton");
             Il2CppObject* settingsButtonTransform;
             helper->RunMethod(&settingsButtonTransform, settingsButton, "get_transform");
@@ -189,30 +208,34 @@ namespace QuestUI {
             helper->RunMethod(&menuTransformParent, settingsButtonTransformParent, "GetParent");
             helper->RunMethod(&menuTransformParent, menuTransformParent, "GetParent");
             helper->RunMethod(&menuTransformParent, menuTransformParent, "GetParent");
+           
             modsButton = UnityHelper::GetComponentInChildren(helper, settingsButtonTransformParent, helper->GetClassFromName("UnityEngine.UI", "Button"), "MainMenuModsButton");
-            if(modsButton != nullptr){
-                assetLoaderFinishedButton = UnityHelper::GetComponentInChildren(helper, settingsButtonTransformParent, helper->GetClassFromName("UnityEngine.UI", "Button"), "AssetLoaderFinishedButton");
-            }else{
-                customUIObject = nullptr;
+            assetLoaderFinishedButton = UnityHelper::GetComponentInChildren(helper, settingsButtonTransformParent, helper->GetClassFromName("UnityEngine.UI", "Button"), "AssetLoaderFinishedButton");
+            bool assetLoaderFinishedButtonExist = assetLoaderFinishedButton != nullptr;
+            if(modsButton == nullptr){
                 loaderInstance = true;
                 helper->RunMethod(&modsButton, nullptr, helper->class_get_method_from_name(helper->GetClassFromName("UnityEngine", "Object"), "Instantiate", 1), settingsButton);
                 helper->RunMethod(modsButton, "set_name", helper->createcsstr("MainMenuModsButton"));
                 Il2CppObject* modsButtonTransform;
                 helper->RunMethod(&modsButtonTransform, modsButton, "get_transform");
                 helper->RunMethod(modsButtonTransform, "SetParent", settingsButtonTransformParent, &boolFalse);
-                
-                UnityHelper::AddButtonOnClick(helper, buttonBinder, modsButton, (void*)ButtonModsOnClick);
+                        
+                UnityHelper::AddButtonOnClick(helper, buttonBinder, modsButton, (UnityHelper::ButtonOnClickFunction*)ButtonModsOnClick);
 
                 helper->RunMethod(&assetLoaderFinishedButton, nullptr, helper->class_get_method_from_name(helper->GetClassFromName("UnityEngine", "Object"), "Instantiate", 1), modsButton);
                 helper->RunMethod(assetLoaderFinishedButton, "set_name", helper->createcsstr("AssetLoaderFinishedButton"));
                 UnityHelper::SetParent(helper, assetLoaderFinishedButton, modsButton);
                 UnityHelper::SetGameObjectActive(helper, assetLoaderFinishedButton, false);
-
-                helper->RunMethod(&menuButtons, menuTransformParent, "GetComponentsInChildren", helper->type_get_object(helper->class_get_type(helper->GetClassFromName("UnityEngine.UI", "Button"))), &boolFalse); 
-                
-                UnityAssetLoader::LoadFromFileAsync("/sdcard/Android/data/com.beatgames.beatsaber/files/uis/questUI.qui", (UnityAssetLoader_OnFinishFunction*)AssetLoaderOnFinish);
             }
-            if(assetLoaderFinishedButton != nullptr){
+            if(loaderInstance){
+                helper->RunMethod(&menuButtons, menuTransformParent, "GetComponentsInChildren", helper->type_get_object(helper->class_get_type(helper->GetClassFromName("UnityEngine.UI", "Button"))), &boolFalse); 
+                if(assetBundle == nullptr){
+                    UnityAssetLoader::LoadAssetBundleFromFileAsync("/sdcard/Android/data/com.beatgames.beatsaber/files/uis/questUI.qui", (UnityAssetLoader_OnLoadAssetBundleCompleteFunction*)OnLoadAssetBundleComplete);
+                }else{
+                    UnityAssetLoader::LoadAssetFromAssetBundleAsync(assetBundle, (UnityAssetLoader_OnLoadAssetCompleteFunction*)OnLoadAssetComplete);
+                }
+            }
+            if(assetLoaderFinishedButton != nullptr && !assetLoaderFinishedButtonExist){
                 Il2CppObject* onClick;
                 helper->RunMethod(&onClick, assetLoaderFinishedButton, "get_onClick");
                 auto action = helper->MakeAction(nullptr, AssetLoaderFinishedButtonOnClick, helper->class_get_type(helper->GetClassFromName("UnityEngine.Events", "UnityAction")));
@@ -224,17 +247,15 @@ namespace QuestUI {
         MainMenuViewController_DidActivate(self, firstActivation, type);   
     }
 
-    void Initialize(char* modName, void* onInitialized){
+    void Initialize(char* modName, VoidFunction* onInitialized){
         questUIModInfo.Name = modName;
         questUIModInfo.OnInitialized = onInitialized;
         if(helper == nullptr){
             helper = new IL2CPP_Helper();
             helper->Initialize();
         }
-
-        Il2CppClass* mainMenuViewControllerClass = helper->GetClassFromName("", "MainMenuViewController");
-        const MethodInfo* mainMenuViewController_DidActivate = helper->class_get_method_from_name(mainMenuViewControllerClass, "DidActivate", 2);
-        INSTALL_HOOK_OFFSETLESS(MainMenuViewController_DidActivate, mainMenuViewController_DidActivate);
+        INSTALL_HOOK_OFFSETLESS(MainMenuViewController_DidActivate, helper->class_get_method_from_name(helper->GetClassFromName("", "MainMenuViewController"), "DidActivate", 2));
+        INSTALL_HOOK_OFFSETLESS(SceneManager_SetActiveScene, helper->class_get_method_from_name(helper->GetClassFromName("UnityEngine.SceneManagement", "SceneManager"), "SetActiveScene", 1));
         log(INFO, "QuestUI: Installed Hook!");
     }
 

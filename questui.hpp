@@ -5,9 +5,11 @@
 
 namespace QuestUI {
 
+    typedef void VoidFunction(); 
+
     struct QuestUIModInfo {
         char* Name;
-        void* OnInitialized;
+        VoidFunction* OnInitialized;
         Il2CppObject* Button;
         Il2CppObject* Panel;
     };
@@ -18,7 +20,7 @@ namespace QuestUI {
         std::vector<QuestUIModInfo*>* Mods;
     };
 
-    void Initialize(char* modNameArg, void* onInitializedArg);
+    void Initialize(char* modNameArg, VoidFunction* onInitializedArg);
 
     QuestUIModInfo GetQuestUIModInfo();
     QuestUIInfo* GetQuestUIInfo();
