@@ -143,4 +143,20 @@ namespace UnityHelper {
     void SetButtonEnabled(IL2CPP_Helper* helper, Il2CppObject* button, bool enabled){
         helper->RunMethod(button, "set_interactable", &enabled);
     }
+
+    bool GetToggleIsOn(IL2CPP_Helper* helper, Il2CppObject* toggle)
+    {
+        if(toggle == nullptr)
+            return false;
+        bool isOn;
+        helper->RunMethod(&isOn, toggle, "get_isOn");
+        return isOn;
+    }
+
+    void SetToggleIsOn(IL2CPP_Helper* helper, Il2CppObject* toggle, bool isOn){
+        if(toggle == nullptr)
+            return;
+        helper->RunMethod(toggle, "set_isOn", &isOn);
+    }
+
 }

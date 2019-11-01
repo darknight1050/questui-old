@@ -35,4 +35,7 @@ namespace UnityHelper {
     void SetButtonTextColor(IL2CPP_Helper* helper, Il2CppObject* button, Color color);
     void SetButtonEnabled(IL2CPP_Helper* helper, Il2CppObject* button, bool enabled);
 
+    bool GetToggleIsOn(IL2CPP_Helper* helper, Il2CppObject* toggle);
+    void SetToggleIsOn(IL2CPP_Helper* helper, Il2CppObject* toggle, bool isOn);
+
 }
