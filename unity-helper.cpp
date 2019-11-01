@@ -134,6 +134,12 @@ namespace UnityHelper {
         helper->RunMethod(buttonTextObject, "set_text", helper->createcsstr(text));
     }
 
+    void SetButtonTextColor(IL2CPP_Helper* helper, Il2CppObject* button, Color color){
+        Il2CppObject* buttonTextObject;
+        helper->RunMethod(&buttonTextObject, button, "GetComponentInChildren", helper->type_get_object(helper->class_get_type(helper->GetClassFromName("TMPro", "TextMeshProUGUI"))), &boolTrue);
+        helper->RunMethod(buttonTextObject, "set_color", &color);
+    } 
+
     void SetButtonEnabled(IL2CPP_Helper* helper, Il2CppObject* button, bool enabled){
         helper->RunMethod(button, "set_interactable", &enabled);
     }
