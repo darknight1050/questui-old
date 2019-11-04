@@ -23,6 +23,8 @@ namespace UnityHelper {
     std::vector<Il2CppObject*> GetComponentsInChildren(IL2CPP_Helper* helper, Il2CppObject* parentObject, Il2CppClass* klass, char* name);
     Il2CppObject* GetComponentInChildren(IL2CPP_Helper* helper, Il2CppObject* parentObject, Il2CppClass* klass, char* name);
 
+    Il2CppObject* GetGameObject(IL2CPP_Helper* helper, Il2CppObject* object);
+
     void DontDestroyOnLoad(IL2CPP_Helper* helper, Il2CppObject* object);
     void SetActive(IL2CPP_Helper* helper, Il2CppObject* object, bool active);
     void SetGameObjectActive(IL2CPP_Helper* helper, Il2CppObject* object, bool active);

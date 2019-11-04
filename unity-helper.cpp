@@ -84,6 +84,14 @@ namespace UnityHelper {
         return nullptr;
     }
 
+    Il2CppObject* GetGameObject(IL2CPP_Helper* helper, Il2CppObject* object){
+        Il2CppObject* gameObject = nullptr;
+        if(object != nullptr){
+            helper->RunMethod(&gameObject, object, "get_gameObject");
+        }
+        return gameObject;
+    }
+
     void DontDestroyOnLoad(IL2CPP_Helper* helper, Il2CppObject* object){
         helper->RunStaticMethod(object, "DontDestroyOnLoad", object);
     }
@@ -93,8 +101,7 @@ namespace UnityHelper {
     }
 
     void SetGameObjectActive(IL2CPP_Helper* helper, Il2CppObject* object, bool active){
-        Il2CppObject* gameObject;
-        helper->RunMethod(&gameObject, object, "get_gameObject");
+        Il2CppObject* gameObject = GetGameObject(helper, object);
         if(gameObject != nullptr)
            SetActive(helper, gameObject, active);
     }

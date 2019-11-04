@@ -9,16 +9,14 @@ namespace QuestUI {
 
     static IL2CPP_Helper* helper = nullptr;
 
-    static bool loadUI = false;
-
     static bool loaderInstance = false;
    
-    static QuestUIInfo* questUIInfo;
+    static QuestUIInfo* questUIInfo = nullptr;
     static QuestUIModInfo questUIModInfo;
 
     static Il2CppObject* menuTransformParent = nullptr;
     static Il2CppObject* buttonBinder = nullptr;
-    static Array<Il2CppObject*>* menuButtons;
+    static Array<Il2CppObject*>* menuButtons = nullptr;
 
     static Il2CppObject* modsButton = nullptr;
     static Il2CppObject* assetLoaderFinishedButton = nullptr;
@@ -51,8 +49,8 @@ namespace QuestUI {
 
     void RefreshList(){
         float buttonMod_TemplateTransformHeight = 27.5f;
-        float ModsListObjectTransformHeight = 220.0f;
-        float listCount = ModsListObjectTransformHeight/buttonMod_TemplateTransformHeight;
+        float modsListObjectTransformHeight = 220.0f;
+        float listCount = modsListObjectTransformHeight/buttonMod_TemplateTransformHeight;
         Color textColorEnabled;
         textColorEnabled.r = 0.0f;
         textColorEnabled.g = 184.0f/255.0f;
@@ -75,15 +73,15 @@ namespace QuestUI {
         helper->RunMethod(&buttonMod_TemplateTransform, buttonMod_Template, "get_transform");
         Vector3 buttonMod_TemplateTransformPosition;
         helper->RunMethod(&buttonMod_TemplateTransformPosition, buttonMod_TemplateTransform, "get_localPosition");
-        Vector3 buttonPos = buttonMod_TemplateTransformPosition;
+        Vector3 buttonPosition = buttonMod_TemplateTransformPosition;
         for(int i = 0;i<questUIInfo->Mods->size();i++){
             QuestUIModInfo* modInfo = (*questUIInfo->Mods)[i];
             if(i >= listIndex && i < listIndex + listCount){
                 UnityHelper::SetGameObjectActive(helper, modInfo->Button, true);
                 Il2CppObject* modInfoButtonTransform;
                 helper->RunMethod(&modInfoButtonTransform, modInfo->Button, "get_transform");
-                helper->RunMethod(modInfoButtonTransform, "set_localPosition", &buttonPos);
-                buttonPos.y -= buttonMod_TemplateTransformHeight;
+                helper->RunMethod(modInfoButtonTransform, "set_localPosition", &buttonPosition);
+                buttonPosition.y -= buttonMod_TemplateTransformHeight;
             }else{
                 UnityHelper::SetGameObjectActive(helper, modInfo->Button, false);
             }
@@ -107,7 +105,6 @@ namespace QuestUI {
             }
             helper->RunMethod(modInfo->Button, "set_colors", &colors);
             UnityHelper::SetButtonTextColor(helper, modInfo->Button, textColor);
-            
         }
     }
 
@@ -149,7 +146,6 @@ namespace QuestUI {
             Il2CppString* nameObject;
             helper->RunMethod(&nameObject, assetLoaderFinishedButtonTextObject, "get_text");
             sscanf(to_utf8(csstrtostr(nameObject)).c_str(), "%llx", &questUIInfo);
-            customUIObject = questUIInfo->CustomUIObject;
         }
         questUIInfo->Mods->push_back(&questUIModInfo);
         log(INFO, "QuestUI: Added mod %s to QuestUIInfo: %p", questUIModInfo.Name, questUIInfo);
@@ -204,7 +200,7 @@ namespace QuestUI {
         Il2CppObject* customUITransform;
         helper->RunMethod(&customUITransform, customUIObject, "get_transform");
         helper->RunMethod(customUITransform, "SetParent", menuTransformParent, &boolFalse);
-
+       
         buttonModsListUp = UnityHelper::GetComponentInChildren(helper, customUIObject, helper->GetClassFromName("UnityEngine.UI", "Button"), "ButtonModsListUp");
         buttonModsListDown = UnityHelper::GetComponentInChildren(helper, customUIObject, helper->GetClassFromName("UnityEngine.UI", "Button"), "ButtonModsListDown");
        
@@ -265,19 +261,22 @@ namespace QuestUI {
         UnityAssetLoader::LoadAssetFromAssetBundleAsync(assetBundle, (UnityAssetLoader_OnLoadAssetBundleCompleteFunction*)OnLoadAssetComplete);
     }
 
-    MAKE_HOOK_OFFSETLESS(SceneManager_SetActiveScene, bool, Il2CppObject* scene)
+    MAKE_HOOK_OFFSETLESS(SceneManager_SetActiveScene, bool, int scene)
     {
         Il2CppString* nameObject;
         helper->RunStaticMethod(&nameObject, helper->GetClassFromName("UnityEngine.SceneManagement", "Scene"), "GetNameInternal", &scene);
-        if(strcmp(to_utf8(csstrtostr(nameObject)).c_str(), "MenuCore") == 0)
-            loadUI = true;
+        log(INFO, "QuestUI: Loading Scene: %s", to_utf8(csstrtostr(nameObject)).c_str());
+        if(customUIObject != nullptr){
+            helper->RunStaticMethod(helper->GetClassFromName("UnityEngine", "Object"), "Destroy", UnityHelper::GetGameObject(helper, customUIObject));
+            customUIObject = nullptr;
+            log(INFO, "QuestUI: Destroyed QuestUI!")
+        }
+            
         return SceneManager_SetActiveScene(scene);
     }
 
     MAKE_HOOK_OFFSETLESS(MainMenuViewController_DidActivate, void, Il2CppObject* self, bool firstActivation, int type){
-        if(loadUI){
-            loadUI = false;
-            customUIObject = nullptr;
+        if(customUIObject == nullptr){
             log(INFO, "QuestUI: Loading QuestUI...")
             Il2CppObject* settingsButton = helper->GetFieldObjectValue(self, "_settingsButton");
             Il2CppObject* settingsButtonTransform;
@@ -325,11 +324,10 @@ namespace QuestUI {
                 auto action = helper->MakeAction(nullptr, AssetLoaderFinishedButtonOnClick, helper->class_get_type(helper->GetClassFromName("UnityEngine.Events", "UnityAction")));
                 helper->RunMethod(onClick, "AddListener", action);
             }
+            log(INFO, "QuestUI: Loaded QuestUI!")
         }
         if(loaderInstance)
             SetUIActive(false);
-        log(INFO, "QuestUI: Loaded QuestUI!")
-            
         MainMenuViewController_DidActivate(self, firstActivation, type);   
     }
 
