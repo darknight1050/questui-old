@@ -28,12 +28,14 @@ namespace UnityHelper {
     void DontDestroyOnLoad(IL2CPP_Helper* helper, Il2CppObject* object);
     void SetActive(IL2CPP_Helper* helper, Il2CppObject* object, bool active);
     void SetGameObjectActive(IL2CPP_Helper* helper, Il2CppObject* object, bool active);
+
+    Il2CppObject* GetParent(IL2CPP_Helper* helper, Il2CppObject* object);
     void SetParent(IL2CPP_Helper* helper, Il2CppObject* object, Il2CppObject* parent);
     void SetSameParent(IL2CPP_Helper* helper, Il2CppObject* object, Il2CppObject* parent);
     
     void AddButtonOnClick(IL2CPP_Helper* helper, Il2CppObject* buttonBinder, Il2CppObject* customUIObject, char* name, ButtonOnClickFunction* handler);
     void AddButtonOnClick(IL2CPP_Helper* helper, Il2CppObject* buttonBinder, Il2CppObject* button, ButtonOnClickFunction* handler);
-    void SetButtonText(IL2CPP_Helper* helper, Il2CppObject* button, char* text);
+    void SetButtonText(IL2CPP_Helper* helper, Il2CppObject* button, std::string text);
     void SetButtonTextColor(IL2CPP_Helper* helper, Il2CppObject* button, Color color);
     void SetButtonEnabled(IL2CPP_Helper* helper, Il2CppObject* button, bool enabled);
 

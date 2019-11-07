@@ -20,6 +20,7 @@ namespace UnityAssetLoader {
         helper->RunMethod(&customAsset, assetBundleRequest, "get_asset");
         if(customAsset == nullptr){
             log(ERROR, "UnityAssetLoader: Couldn't get Asset");
+            onLoadAssetComplete = nullptr;
             return;
         }
         onLoadAssetComplete(customAsset);

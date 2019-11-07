@@ -106,6 +106,15 @@ namespace UnityHelper {
            SetActive(helper, gameObject, active);
     }
 
+    Il2CppObject* GetParent(IL2CPP_Helper* helper, Il2CppObject* object){
+        Il2CppObject* parent = nullptr;
+        if(object != nullptr)
+            helper->RunMethod(&parent, object, "get_transform");
+        if(parent != nullptr)
+            helper->RunMethod(&parent, parent, "GetParent");
+        return parent;
+    }
+
     void SetParent(IL2CPP_Helper* helper, Il2CppObject* object, Il2CppObject* parent){
         Il2CppObject* parentTransform;
         helper->RunMethod(&parentTransform, parent, "get_transform");
@@ -113,13 +122,12 @@ namespace UnityHelper {
         helper->RunMethod(&objectTransform, object, "get_transform");
         helper->RunMethod(objectTransform, "SetParent", parentTransform, &boolFalse);
     }
-    void SetSameParent(IL2CPP_Helper* helper, Il2CppObject* object, Il2CppObject* parent){
-        Il2CppObject* parentTransform;
-        helper->RunMethod(&parentTransform, parent, "get_transform");
-        helper->RunMethod(&parentTransform, parentTransform, "GetParent");
+
+    void SetSameParent(IL2CPP_Helper* helper, Il2CppObject* object, Il2CppObject* objectTwo){
+        Il2CppObject* parent = GetParent(helper, objectTwo);
         Il2CppObject* objectTransform;
         helper->RunMethod(&objectTransform, object, "get_transform");
-        helper->RunMethod(objectTransform, "SetParent", parentTransform, &boolFalse);
+        helper->RunMethod(objectTransform, "SetParent", parent, &boolFalse);
     }
     
     void AddButtonOnClick(IL2CPP_Helper* helper, Il2CppObject* buttonBinder, Il2CppObject* customUIObject, char* name, ButtonOnClickFunction* handler){
@@ -135,7 +143,7 @@ namespace UnityHelper {
         helper->RunMethod(buttonBinder, "AddBinding", button, action);
     }
         
-    void SetButtonText(IL2CPP_Helper* helper, Il2CppObject* button, char* text){
+    void SetButtonText(IL2CPP_Helper* helper, Il2CppObject* button, std::string text){
         Il2CppObject* buttonTextObject;
         helper->RunMethod(&buttonTextObject, button, "GetComponentInChildren", helper->type_get_object(helper->class_get_type(helper->GetClassFromName("TMPro", "TextMeshProUGUI"))), &boolTrue);
         helper->RunMethod(buttonTextObject, "set_text", helper->createcsstr(text));
