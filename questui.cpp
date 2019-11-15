@@ -269,21 +269,20 @@ namespace QuestUI {
         if(customUIObject != nullptr){
             helper->RunStaticMethod(helper->GetClassFromName("UnityEngine", "Object"), "Destroy", UnityHelper::GetGameObject(helper, customUIObject));
             customUIObject = nullptr;
-            log(INFO, "QuestUI: Destroyed QuestUI!")
+            log(INFO, "QuestUI: Destroyed QuestUI!");
         }
-            
         return SceneManager_SetActiveScene(scene);
     }
 
     MAKE_HOOK_OFFSETLESS(MainMenuViewController_DidActivate, void, Il2CppObject* self, bool firstActivation, int type){
         if(customUIObject == nullptr){
             log(INFO, "QuestUI: Loading QuestUI...")
+            helper->RunMethod(&buttonBinder, self, "get__buttonBinder");
             Il2CppObject* settingsButton = helper->GetFieldObjectValue(self, "_settingsButton");
             Il2CppObject* settingsButtonTransform;
             helper->RunMethod(&settingsButtonTransform, settingsButton, "get_transform");
             Il2CppObject* settingsButtonTransformParent;
             helper->RunMethod(&settingsButtonTransformParent, settingsButtonTransform, "GetParent");
-            helper->RunMethod(&buttonBinder, self, "get__buttonBinder");
             helper->RunMethod(&menuTransformParent, settingsButtonTransformParent, "GetParent");
             helper->RunMethod(&menuTransformParent, menuTransformParent, "GetParent");
             helper->RunMethod(&menuTransformParent, menuTransformParent, "GetParent");
@@ -300,18 +299,20 @@ namespace QuestUI {
                         
                 UnityHelper::AddButtonOnClick(helper, buttonBinder, modsButton, (UnityHelper::ButtonOnClickFunction*)ButtonModsOnClick);
 
-                helper->RunMethod(&assetLoaderFinishedButton, nullptr, helper->class_get_method_from_name(helper->GetClassFromName("UnityEngine", "Object"), "Instantiate", 1), modsButton);
+                helper->RunMethod(&assetLoaderFinishedButton, nullptr, helper->class_get_method_from_name(helper->GetClassFromName("UnityEngine", "Object"), "Instantiate", 1), settingsButton);
                 helper->RunMethod(assetLoaderFinishedButton, "set_name", helper->createcsstr("AssetLoaderFinishedButton"));
-                UnityHelper::SetParent(helper, assetLoaderFinishedButton, modsButton);
+                UnityHelper::SetSameParent(helper, assetLoaderFinishedButton, settingsButton);
                 UnityHelper::SetGameObjectActive(helper, assetLoaderFinishedButton, false);
             }
             if(loaderInstance){
                 helper->RunMethod(&menuButtons, menuTransformParent, "GetComponentsInChildren", helper->type_get_object(helper->class_get_type(helper->GetClassFromName("UnityEngine.UI", "Button"))), &boolFalse);
-                Il2CppObject* onClick;
-                helper->RunMethod(&onClick, assetLoaderFinishedButton, "get_onClick");
-                Il2CppObject* m_Calls = helper->GetFieldObjectValue(onClick, "m_Calls");
-                helper->RunMethod(helper->GetFieldObjectValue(m_Calls, "m_RuntimeCalls"), "Clear");
-                helper->SetFieldValue(m_Calls, "m_NeedsUpdate", &boolTrue);
+                if(assetLoaderFinishedButton != nullptr){
+                    Il2CppObject* onClick;
+                    helper->RunMethod(&onClick, assetLoaderFinishedButton, "get_onClick");
+                    Il2CppObject* m_Calls = helper->GetFieldObjectValue(onClick, "m_Calls");
+                    helper->RunMethod(helper->GetFieldObjectValue(m_Calls, "m_RuntimeCalls"), "Clear");
+                    helper->SetFieldValue(m_Calls, "m_NeedsUpdate", &boolTrue);
+                }
                 if(assetBundle == nullptr){
                     UnityAssetLoader::LoadAssetBundleFromFileAsync("/sdcard/Android/data/com.beatgames.beatsaber/files/uis/questUI.qui", (UnityAssetLoader_OnLoadAssetBundleCompleteFunction*)OnLoadAssetBundleComplete);
                 }else{
