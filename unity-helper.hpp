@@ -13,33 +13,33 @@ namespace UnityHelper {
 
     typedef void ButtonOnClickFunction(Il2CppObject* button);
 
-    std::vector<Il2CppObject*> FindGameObjectsWithTag(IL2CPP_Helper* helper, char* name);
-    Il2CppObject* FindGameObjectWithTag(IL2CPP_Helper* helper, char* name);
-    Il2CppObject* FindGameObject(IL2CPP_Helper* helper, char* name);
+    std::vector<Il2CppObject*> FindGameObjectsWithTag(char* name);
+    Il2CppObject* FindGameObjectWithTag(char* name);
+    Il2CppObject* FindGameObject(char* name);
   
-    std::vector<Il2CppObject*> GetComponentsInParent(IL2CPP_Helper* helper, Il2CppObject* parentObject, Il2CppClass* klass, char* name);
-    Il2CppObject* GetComponentInParent(IL2CPP_Helper* helper, Il2CppObject* parentObject, Il2CppClass* klass, char* name);
+    std::vector<Il2CppObject*> GetComponentsInParent(Il2CppObject* parentObject, Il2CppClass* klass, char* name);
+    Il2CppObject* GetComponentInParent(Il2CppObject* parentObject, Il2CppClass* klass, char* name);
     
-    std::vector<Il2CppObject*> GetComponentsInChildren(IL2CPP_Helper* helper, Il2CppObject* parentObject, Il2CppClass* klass, char* name);
-    Il2CppObject* GetComponentInChildren(IL2CPP_Helper* helper, Il2CppObject* parentObject, Il2CppClass* klass, char* name);
+    std::vector<Il2CppObject*> GetComponentsInChildren(Il2CppObject* parentObject, Il2CppClass* klass, char* name);
+    Il2CppObject* GetComponentInChildren(Il2CppObject* parentObject, Il2CppClass* klass, char* name);
 
-    Il2CppObject* GetGameObject(IL2CPP_Helper* helper, Il2CppObject* object);
+    Il2CppObject* GetGameObject(Il2CppObject* object);
 
-    void DontDestroyOnLoad(IL2CPP_Helper* helper, Il2CppObject* object);
-    void SetActive(IL2CPP_Helper* helper, Il2CppObject* object, bool active);
-    void SetGameObjectActive(IL2CPP_Helper* helper, Il2CppObject* object, bool active);
+    void DontDestroyOnLoad(Il2CppObject* object);
+    void SetActive(Il2CppObject* object, bool active);
+    void SetGameObjectActive(Il2CppObject* object, bool active);
 
-    Il2CppObject* GetParent(IL2CPP_Helper* helper, Il2CppObject* object);
-    void SetParent(IL2CPP_Helper* helper, Il2CppObject* object, Il2CppObject* parent);
-    void SetSameParent(IL2CPP_Helper* helper, Il2CppObject* object, Il2CppObject* parent);
+    Il2CppObject* GetParent(Il2CppObject* object);
+    void SetParent(Il2CppObject* object, Il2CppObject* parent);
+    void SetSameParent(Il2CppObject* object, Il2CppObject* parent);
     
-    void AddButtonOnClick(IL2CPP_Helper* helper, Il2CppObject* buttonBinder, Il2CppObject* customUIObject, char* name, ButtonOnClickFunction* handler);
-    void AddButtonOnClick(IL2CPP_Helper* helper, Il2CppObject* buttonBinder, Il2CppObject* button, ButtonOnClickFunction* handler);
-    void SetButtonText(IL2CPP_Helper* helper, Il2CppObject* button, std::string text);
-    void SetButtonTextColor(IL2CPP_Helper* helper, Il2CppObject* button, Color color);
-    void SetButtonEnabled(IL2CPP_Helper* helper, Il2CppObject* button, bool enabled);
+    void AddButtonOnClick(Il2CppObject* buttonBinder, Il2CppObject* customUIObject, char* name, ButtonOnClickFunction* handler);
+    void AddButtonOnClick(Il2CppObject* buttonBinder, Il2CppObject* button, ButtonOnClickFunction* handler);
+    void SetButtonText(Il2CppObject* button, std::string text);
+    void SetButtonTextColor(Il2CppObject* button, Color color);
+    void SetButtonEnabled(Il2CppObject* button, bool enabled);
 
-    bool GetToggleIsOn(IL2CPP_Helper* helper, Il2CppObject* toggle);
-    void SetToggleIsOn(IL2CPP_Helper* helper, Il2CppObject* toggle, bool isOn);
+    bool GetToggleIsOn(Il2CppObject* toggle);
+    void SetToggleIsOn(Il2CppObject* toggle, bool isOn);
 
 }
