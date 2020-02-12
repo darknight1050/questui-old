@@ -26,7 +26,7 @@ namespace UnityHelper {
 
     Il2CppObject* FindGameObject(char* name){
         Il2CppObject* object;
-        il2cpp_utils::RunMethod(&object, nullptr, il2cpp_utils::GetMethod("UnityEngine", "GameObject", "Find", 1), il2cpp_utils::createcsstr(name));
+        il2cpp_utils::RunMethod(&object, nullptr, il2cpp_utils::FindMethod("UnityEngine", "GameObject", "Find", 1), il2cpp_utils::createcsstr(name));
         return object;
     }
   

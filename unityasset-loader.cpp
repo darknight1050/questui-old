@@ -53,7 +53,7 @@ namespace UnityAssetLoader {
             return false;
         }
         il2cpp_utils::RunMethod(assetBundleRequest, "set_allowSceneActivation", &boolTrue);
-        auto action = il2cpp_utils::MakeAction(nullptr, (void*)AssetBundleRequestComplete, il2cpp_functions::class_get_type(il2cpp_utils::GetClassFromName("System", "Action")));
+        auto action = il2cpp_utils::MakeAction(nullptr, AssetBundleRequestComplete, il2cpp_functions::class_get_type(il2cpp_utils::GetClassFromName("System", "Action")));
         if(action == nullptr){
             log(ERROR, "UnityAssetLoader: Couldn't make AssetBundleComplete Action");
             return false;
