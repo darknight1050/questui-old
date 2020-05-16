@@ -1,3 +1,6 @@
+#ifndef UNITY_HELPER_H
+#define UNITY_HELPER_H
+
 #include "../beatsaber-hook/shared/utils/utils.h"
 
 namespace UnityHelper {
@@ -43,3 +46,4 @@ namespace UnityHelper {
     void SetToggleIsOn(Il2CppObject* toggle, bool isOn);
 
 }
+#endif

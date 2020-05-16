@@ -1,4 +1,5 @@
 #include "../beatsaber-hook/shared/utils/utils.h"
+#include "../CustomSabers/AssetImporter.hpp"
 
 #include "unityasset-loader.hpp"
 #include "unity-helper.hpp"

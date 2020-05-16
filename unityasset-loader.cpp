@@ -15,7 +15,7 @@ namespace UnityAssetLoader {
     void AssetBundleRequestComplete(){
         log(INFO, "UnityAssetLoader: AssetBundleRequestComplete Called!");
         Il2CppObject* customAsset;
-        il2cpp_utils::RunMethod(&customAsset, assetBundleRequest, "get_asset");
+        customAsset = *CRASH_UNLESS(il2cpp_utils::RunMethod<Il2CppObject*>(assetBundleRequest, "get_asset"));
         if(customAsset == nullptr){
             log(ERROR, "UnityAssetLoader: Couldn't get Asset");
             onLoadAssetComplete = nullptr;
@@ -30,7 +30,7 @@ namespace UnityAssetLoader {
     void AssetBundleCreateRequestComplete(){
         log(INFO, "UnityAssetLoader: AssetBundleCreateRequestComplete Called!");
         Il2CppObject* customAssetBundle;
-        il2cpp_utils::RunMethod(&customAssetBundle, assetBundleCreateRequest, "get_assetBundle");
+        customAssetBundle = *CRASH_UNLESS(il2cpp_utils::RunMethod<Il2CppObject*>(assetBundleCreateRequest, "get_assetBundle"));
         if(customAssetBundle == nullptr){
             log(ERROR, "UnityAssetLoader: Couldn't get AssetBundle");
             onLoadAssetBundleComplete = nullptr;
@@ -47,13 +47,13 @@ namespace UnityAssetLoader {
             log(ERROR, "UnityAssetLoader: Already Loading an Asset");
             return false;
         }
-        il2cpp_utils::RunMethod(&assetBundleRequest, assetBundle, "LoadAssetAsync", il2cpp_utils::createcsstr("_customasset"), il2cpp_functions::type_get_object(il2cpp_functions::class_get_type(il2cpp_utils::GetClassFromName("UnityEngine", "GameObject"))));
+        assetBundleRequest = *CRASH_UNLESS(il2cpp_utils::RunMethod<Il2CppObject*>(assetBundle, "LoadAssetAsync", il2cpp_utils::createcsstr("_customasset"), il2cpp_functions::type_get_object(il2cpp_functions::class_get_type(il2cpp_utils::GetClassFromName("UnityEngine", "GameObject")))));
         if(assetBundleRequest == nullptr){
             log(ERROR, "UnityAssetLoader: Couldn't run method LoadAssetAsync");
             return false;
         }
-        il2cpp_utils::RunMethod(assetBundleRequest, "set_allowSceneActivation", &boolTrue);
-        auto action = il2cpp_utils::MakeAction(nullptr, AssetBundleRequestComplete, il2cpp_functions::class_get_type(il2cpp_utils::GetClassFromName("System", "Action")));
+        il2cpp_utils::RunMethod(assetBundleRequest, "set_allowSceneActivation", boolTrue);
+        auto action = il2cpp_utils::MakeAction(il2cpp_functions::class_get_type(il2cpp_utils::GetClassFromName("System", "Action")),nullptr,AssetBundleRequestComplete);
         if(action == nullptr){
             log(ERROR, "UnityAssetLoader: Couldn't make AssetBundleComplete Action");
             return false;
@@ -81,13 +81,13 @@ namespace UnityAssetLoader {
             log(ERROR, "UnityAssetLoader: Couldn't get method LoadFromFileAsync");
             return false;
         }
-        il2cpp_utils::RunMethod(&assetBundleCreateRequest, nullptr, assetBundle_LoadFromFileAsyncMethod, il2cpp_utils::createcsstr(filePath));
+        il2cpp_utils::RunMethod(&assetBundleCreateRequest, assetBundle_LoadFromFileAsyncMethod, il2cpp_utils::createcsstr(filePath));
         if(assetBundleCreateRequest == nullptr){
             log(ERROR, "UnityAssetLoader: Couldn't run method LoadFromFileAsync");
             return false;
         }
-        il2cpp_utils::RunMethod(assetBundleCreateRequest, "set_allowSceneActivation", &boolTrue);
-        auto action = il2cpp_utils::MakeAction(nullptr, AssetBundleCreateRequestComplete, il2cpp_functions::class_get_type(il2cpp_utils::GetClassFromName("System", "Action")));
+        il2cpp_utils::RunMethod(assetBundleCreateRequest, "set_allowSceneActivation", boolTrue);
+        auto action = il2cpp_utils::MakeAction(il2cpp_functions::class_get_type(il2cpp_utils::GetClassFromName("System", "Action")),nullptr,AssetBundleCreateRequestComplete);
         if(action == nullptr){
             log(ERROR, "UnityAssetLoader: Couldn't make AssetBundleCreateRequestComplete Action");
             return false;
