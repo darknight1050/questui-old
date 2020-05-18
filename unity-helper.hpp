@@ -12,7 +12,7 @@ namespace UnityHelper {
         Color m_SelectedColor;
         Color m_DisabledColor;
         float m_ColorMultiplier;
-	    float m_FadeDuration;
+        float m_FadeDuration;
     } ColorBlock;
 
     typedef void ButtonOnClickFunction(Il2CppObject* button);
