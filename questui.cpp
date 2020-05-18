@@ -93,7 +93,7 @@ namespace QuestUI {
                 colors.m_HighlightedColor.b = 205.0f / 255.0f;
                 colors.m_HighlightedColor.a = 164.0f / 255.0f;
             }
-            //CRASH_UNLESS(il2cpp_utils::RunMethod<UnityHelper::ColorBlock>(modInfo->Button, "set_colors", colors));
+            CRASH_UNLESS(il2cpp_utils::SetPropertyValue(modInfo->Button, "colors", colors));
             UnityHelper::SetButtonTextColor(modInfo->Button, textColor);
         }
     }
