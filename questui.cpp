@@ -3,7 +3,7 @@
 #include <thread>
 #include <vector>
 
-#include "../CustomSabers/AssetBundle.hpp"
+#include "AssetBundle.hpp"
 #include "../beatsaber-hook/shared/utils/logging.hpp"
 #include "../beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 
