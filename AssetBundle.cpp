@@ -19,7 +19,7 @@ void AssetBundle::AssetComplete(AssetCallback callback, Il2CppObject* assetBundl
     log(INFO, "AssetBundle::AssetComplete called!");
     CRASH_UNLESS(il2cpp_utils::GetPropertyValue<bool>(assetBundleRequest, "isDone").value_or(false));
     auto* asset = RET_V_UNLESS(il2cpp_utils::GetPropertyValue<Asset*>(assetBundleRequest, "asset"));
-    RET_V_UNLESS(CheckAssetClass(asset));
+    // RET_V_UNLESS(CheckAssetClass(asset));
     callback(asset);
     il2cpp_utils::RunMethod(assetBundleRequest, "Finalize");
     log(INFO, "AssetBundle::AssetComplete finished!");
