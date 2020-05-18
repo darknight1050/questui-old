@@ -1,7 +1,5 @@
-#include "../beatsaber-hook/shared/utils/utils.h"
-#include "../CustomSabers/AssetImporter.hpp"
-
-#include "unityasset-loader.hpp"
+#pragma once
+#include "../beatsaber-hook/shared/utils/typedefs.h"
 #include "unity-helper.hpp"
 
 namespace QuestUI {
@@ -9,7 +7,7 @@ namespace QuestUI {
     typedef void VoidFunction(); 
 
     struct QuestUIModInfo {
-        char* Name;
+        std::string Name;
         VoidFunction* OnInitialized;
         Il2CppObject* Button;
         Il2CppObject* Panel;
@@ -18,11 +16,11 @@ namespace QuestUI {
     struct QuestUIInfo {
         Il2CppObject* CustomUIObject;
         Il2CppObject* ButtonBinder;
-        std::vector<QuestUIModInfo*>* Mods;
+        std::vector<QuestUIModInfo*> Mods;
     };
 
-    void Initialize(char* modNameArg, VoidFunction* onInitializedArg);
+    void Initialize(std::string_view modNameArg, VoidFunction* onInitializedArg);
 
-    QuestUIModInfo GetQuestUIModInfo();
+    QuestUIModInfo* GetQuestUIModInfo();
     QuestUIInfo* GetQuestUIInfo();
 }

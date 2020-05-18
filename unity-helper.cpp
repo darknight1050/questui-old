@@ -1,46 +1,40 @@
 #include "unity-helper.hpp"
-#include <vector>
+
+#include "../beatsaber-hook/shared/utils/il2cpp-utils.hpp"
+#include "../beatsaber-hook/shared/utils/utils.h"
 
 namespace UnityHelper {
-
-    bool boolTrue = true;
-    bool boolFalse = false;
-
-    std::vector<Il2CppObject*> FindGameObjectsWithTag(char* name){
+    std::vector<Il2CppObject*> FindGameObjectsWithTag(std::string_view name) {
+        auto* objects = CRASH_UNLESS(il2cpp_utils::RunMethod<Array<Il2CppObject*>*>(
+            "UnityEngine", "GameObject", "FindGameObjectsWithTag", il2cpp_utils::createcsstr(name)));
         std::vector<Il2CppObject*> componentsFound;
-        Array<Il2CppObject*>* objects;
-        objects = *CRASH_UNLESS(il2cpp_utils::RunMethod<Array<Il2CppObject*>*>(il2cpp_utils::GetClassFromName("UnityEngine", "GameObject"), "FindGameObjectsWithTag", il2cpp_utils::createcsstr(name)));
-        for(int i = 0;i<objects->Length();i++){
+        for (int i = 0; i < objects->Length(); i++) {
             componentsFound.push_back(objects->values[i]);
         }
         return componentsFound;
     }
 
-    Il2CppObject* FindGameObjectWithTag(char* name){
+    Il2CppObject* FindGameObjectWithTag(std::string_view name) {
         std::vector<Il2CppObject*> componentsFound = FindGameObjectsWithTag(name);
-        if(componentsFound.size() > 0){
+        if (componentsFound.size() > 0) {
             return componentsFound[0];
         }
         return nullptr;
-    } 
-
-    Il2CppObject* FindGameObject(char* name){
-        Il2CppObject* object;
-        il2cpp_utils::RunMethod(&object, il2cpp_utils::FindMethodUnsafe("UnityEngine", "GameObject", "Find", 1), il2cpp_utils::createcsstr(name));
-        return object;
     }
-  
-    std::vector<Il2CppObject*> GetComponentsInParent(Il2CppObject* parentObject, Il2CppClass* klass, char* name){
+
+    Il2CppObject* FindGameObject(std::string_view name) {
+        return CRASH_UNLESS(il2cpp_utils::RunMethod("UnityEngine", "GameObject", "Find", il2cpp_utils::createcsstr(name)));
+    }
+
+    std::vector<Il2CppObject*> GetComponentsInParent(Il2CppObject* parentObject, Il2CppReflectionType* tComp, std::string_view name) {
+        auto* objects = CRASH_UNLESS(il2cpp_utils::RunMethod<Array<Il2CppObject*>*>(
+            parentObject, "GetComponentsInParent", tComp, true));
         std::vector<Il2CppObject*> componentsFound;
-        Array<Il2CppObject*>* objects;
-        objects = *CRASH_UNLESS(il2cpp_utils::RunMethod<Array<Il2CppObject*>*>(parentObject, "GetComponentsInParent", il2cpp_functions::type_get_object(il2cpp_functions::class_get_type(klass)), boolTrue));
-        for(int i = 0;i<objects->Length();i++){
+        for (int i = 0; i < objects->Length(); i++) {
             Il2CppObject* object = objects->values[i];
-            if(object != nullptr){
-                Il2CppString* nameObject;
-                nameObject = *CRASH_UNLESS(il2cpp_utils::RunMethod<Il2CppString*>(object, "get_name"));
-                if (strcmp(to_utf8(csstrtostr(nameObject)).c_str(), name) == 0)
-                {
+            if (object) {
+                auto* nameObject = CRASH_UNLESS(il2cpp_utils::GetPropertyValue<Il2CppString*>(object, "name"));
+                if (to_utf8(csstrtostr(nameObject)) == name) {
                     componentsFound.push_back(object);
                 }
             }
@@ -48,25 +42,23 @@ namespace UnityHelper {
         return componentsFound;
     }
 
-    Il2CppObject* GetComponentInParent(Il2CppObject* parentObject, Il2CppClass* klass, char* name){
-        std::vector<Il2CppObject*> componentsFound = GetComponentsInParent(parentObject, klass, name);
-        if(componentsFound.size() > 0){
+    Il2CppObject* GetComponentInParent(Il2CppObject* parentObject, Il2CppReflectionType* tComp, std::string_view name) {
+        std::vector<Il2CppObject*> componentsFound = GetComponentsInParent(parentObject, tComp, name);
+        if (componentsFound.size() > 0) {
             return componentsFound[0];
         }
         return nullptr;
     }
 
-    std::vector<Il2CppObject*> GetComponentsInChildren(Il2CppObject* parentObject, Il2CppClass* klass, char* name){
+    std::vector<Il2CppObject*> GetComponentsInChildren(Il2CppObject* parentObject, Il2CppReflectionType* tComp, std::string_view name) {
+        auto* objects = CRASH_UNLESS(il2cpp_utils::RunMethod<Array<Il2CppObject*>*>(
+            parentObject, "GetComponentsInChildren", tComp, true));
         std::vector<Il2CppObject*> componentsFound;
-        Array<Il2CppObject*>* objects;
-        objects = *CRASH_UNLESS(il2cpp_utils::RunMethod<Array<Il2CppObject*>*>(parentObject, "GetComponentsInChildren", il2cpp_functions::type_get_object(il2cpp_functions::class_get_type(klass)), boolTrue));
-        for(int i = 0;i<objects->Length();i++){
+        for (int i = 0; i < objects->Length(); i++) {
             Il2CppObject* object = objects->values[i];
-            if(object != nullptr){
-                Il2CppString* nameObject;
-                nameObject = *CRASH_UNLESS(il2cpp_utils::RunMethod<Il2CppString*>(object, "get_name"));
-                if (strcmp(to_utf8(csstrtostr(nameObject)).c_str(), name) == 0)
-                {
+            if (object) {
+                auto* nameObject = CRASH_UNLESS(il2cpp_utils::GetPropertyValue<Il2CppString*>(object, "name"));
+                if (name == to_utf8(csstrtostr(nameObject))) {
                     componentsFound.push_back(object);
                 }
             }
@@ -74,102 +66,93 @@ namespace UnityHelper {
         return componentsFound;
     }
 
-    Il2CppObject* GetComponentInChildren(Il2CppObject* parentObject, Il2CppClass* klass, char* name){
-        std::vector<Il2CppObject*> componentsFound = GetComponentsInChildren(parentObject, klass, name);
-        if(componentsFound.size() > 0){
+    Il2CppObject* GetComponentInChildren(Il2CppObject* parentObject, Il2CppReflectionType* tComp, std::string_view name) {
+        std::vector<Il2CppObject*> componentsFound = GetComponentsInChildren(parentObject, tComp, name);
+        if (componentsFound.size() > 0) {
             return componentsFound[0];
         }
         return nullptr;
     }
 
-    Il2CppObject* GetGameObject(Il2CppObject* object){
-        Il2CppObject* gameObject = nullptr;
-        if(object != nullptr){
-            gameObject = *CRASH_UNLESS(il2cpp_utils::RunMethod<Il2CppObject*>(object, "get_gameObject"));
-        }
-        return gameObject;
+    Il2CppObject* GetGameObject(Il2CppObject* object) {
+        RET_0_UNLESS(object);
+        return CRASH_UNLESS(il2cpp_utils::GetPropertyValue(object, "gameObject"));
     }
 
-    void DontDestroyOnLoad(Il2CppObject* object){
-        il2cpp_utils::RunMethod(il2cpp_utils::GetClassFromName("UnityEngine", "Object"), "DontDestroyOnLoad", object);
-    }
-   
-    void SetActive(Il2CppObject* object, bool active){
-        il2cpp_utils::RunMethod(object, "SetActive", active);
+    void DontDestroyOnLoad(Il2CppObject* object) {
+        RET_V_UNLESS(object);
+        CRASH_UNLESS(il2cpp_utils::RunMethod("UnityEngine", "Object", "DontDestroyOnLoad", object));
     }
 
-    void SetGameObjectActive(Il2CppObject* object, bool active){
-        Il2CppObject* gameObject = GetGameObject(object);
-        if(gameObject != nullptr)
-           SetActive(gameObject, active);
+    void SetActive(Il2CppObject* object, bool active) {
+        RET_V_UNLESS(object);
+        CRASH_UNLESS(il2cpp_utils::RunMethod(object, "SetActive", active));
     }
 
-    Il2CppObject* GetParent(Il2CppObject* object){
-        Il2CppObject* parent = nullptr;
-        if(object != nullptr)
-            parent = *CRASH_UNLESS(il2cpp_utils::RunMethod<Il2CppObject*>(object, "get_transform"));
-        if(parent != nullptr)
-            parent = *CRASH_UNLESS(il2cpp_utils::RunMethod<Il2CppObject*>(parent, "GetParent"));
-        return parent;
+    void SetGameObjectActive(Il2CppObject* object, bool active) {
+        Il2CppObject* gameObject = RET_V_UNLESS(GetGameObject(object));
+        SetActive(gameObject, active);
     }
 
-    void SetParent(Il2CppObject* object, Il2CppObject* parent){
-        Il2CppObject* parentTransform;
-        parentTransform = *CRASH_UNLESS(il2cpp_utils::RunMethod<Il2CppObject*>(parent, "get_transform"));
-        Il2CppObject* objectTransform;
-        objectTransform = *CRASH_UNLESS(il2cpp_utils::RunMethod<Il2CppObject*>(object, "get_transform"));
-        il2cpp_utils::RunMethod(objectTransform, "SetParent", parentTransform, boolFalse);
+    Il2CppObject* GetParentTransform(Il2CppObject* object) {
+        RET_0_UNLESS(object);
+        auto* objT = CRASH_UNLESS(il2cpp_utils::GetPropertyValue(object, "transform"));
+        return CRASH_UNLESS(il2cpp_utils::RunMethod(objT, "GetParent"));
     }
 
-    void SetSameParent(Il2CppObject* object, Il2CppObject* objectTwo){
-        Il2CppObject* parent = GetParent(objectTwo);
-        Il2CppObject* objectTransform;
-        objectTransform = *CRASH_UNLESS(il2cpp_utils::RunMethod<Il2CppObject*>(object, "get_transform"));
-        il2cpp_utils::RunMethod(objectTransform, "SetParent", parent, boolFalse);
+    void SetParent(Il2CppObject* object, Il2CppObject* parent) {
+        auto* parentTransform = CRASH_UNLESS(il2cpp_utils::GetPropertyValue(parent, "transform"));
+        auto* objectTransform = CRASH_UNLESS(il2cpp_utils::GetPropertyValue(object, "transform"));
+        il2cpp_utils::RunMethod(objectTransform, "SetParent", parentTransform, false);
     }
-    
-    void AddButtonOnClick(Il2CppObject* buttonBinder, Il2CppObject* customUIObject, char* name, ButtonOnClickFunction* handler){
-        std::vector<Il2CppObject*> customUIButtons = GetComponentsInChildren(customUIObject, il2cpp_utils::GetClassFromName("UnityEngine.UI", "Button"), name);
-        for(Il2CppObject* customUIButton : customUIButtons){
-            auto action = il2cpp_utils::MakeAction(il2cpp_functions::class_get_type(il2cpp_utils::GetClassFromName("System", "Action")), customUIButton, handler); //RS
-            il2cpp_utils::RunMethod(buttonBinder, "AddBinding", customUIButton, action); 
+
+    void SetSameParent(Il2CppObject* object, Il2CppObject* objectTwo) {
+        Il2CppObject* parent = GetParentTransform(objectTwo);
+        auto* objectTransform = CRASH_UNLESS(il2cpp_utils::GetPropertyValue(object, "transform"));
+        CRASH_UNLESS(il2cpp_utils::RunMethod(objectTransform, "SetParent", parent, false));
+    }
+
+    void AddButtonOnClick(Il2CppObject* buttonBinder, Il2CppObject* customUIObject, std::string_view name, ButtonOnClickFunction* handler) {
+        auto* tButton = CRASH_UNLESS(il2cpp_utils::GetSystemType("UnityEngine.UI", "Button"));
+        std::vector<Il2CppObject*> customUIButtons = GetComponentsInChildren(customUIObject, tButton, name);
+        for (Il2CppObject* customUIButton : customUIButtons) {
+            AddButtonOnClick(buttonBinder, customUIButton, handler);
         }
     }
 
-    void AddButtonOnClick(Il2CppObject* buttonBinder, Il2CppObject* button, ButtonOnClickFunction* handler){
-        auto action = il2cpp_utils::MakeAction(il2cpp_functions::class_get_type(il2cpp_utils::GetClassFromName("System", "Action")),button, handler); //RS
-        il2cpp_utils::RunMethod(buttonBinder, "AddBinding", button, action); 
-    }
-        
-    void SetButtonText(Il2CppObject* button, std::string text){
-        Il2CppObject* buttonTextObject;
-        buttonTextObject = *CRASH_UNLESS(il2cpp_utils::RunMethod<Il2CppObject*>(button, "GetComponentInChildren", il2cpp_functions::type_get_object(il2cpp_functions::class_get_type(il2cpp_utils::GetClassFromName("TMPro", "TextMeshProUGUI"))), boolTrue));
-        il2cpp_utils::RunMethod(buttonTextObject, "set_text", il2cpp_utils::createcsstr(text));
+    void AddButtonOnClick(Il2CppObject* buttonBinder, Il2CppObject* button, ButtonOnClickFunction* handler) {
+        static auto* method = CRASH_UNLESS(il2cpp_utils::FindMethodUnsafe(buttonBinder, "AddBinding", 2));
+        auto* action = CRASH_UNLESS(il2cpp_utils::MakeAction(method, 1, button, handler));
+        CRASH_UNLESS(il2cpp_utils::RunMethod(buttonBinder, method, button, action));
     }
 
-    void SetButtonTextColor(Il2CppObject* button, Color color){
-        Il2CppObject* buttonTextObject;
-        buttonTextObject = *CRASH_UNLESS(il2cpp_utils::RunMethod<Il2CppObject*>(button, "GetComponentInChildren", il2cpp_functions::type_get_object(il2cpp_functions::class_get_type(il2cpp_utils::GetClassFromName("TMPro", "TextMeshProUGUI"))), boolTrue));
-        il2cpp_utils::RunMethod(buttonTextObject, "set_color", color);
-    } 
-
-    void SetButtonEnabled(Il2CppObject* button, bool enabled){
-        il2cpp_utils::RunMethod(button, "set_interactable", enabled);
+    Il2CppObject* _getButtonTextObject(Il2CppObject* button) {
+        RET_0_UNLESS(button);
+        auto* tTMProUGUI = CRASH_UNLESS(il2cpp_utils::GetSystemType("TMPro", "TextMeshProUGUI"));
+        return CRASH_UNLESS(il2cpp_utils::RunMethod(button, "GetComponentInChildren", tTMProUGUI, true));
     }
 
-    bool GetToggleIsOn(Il2CppObject* toggle)
-    {
-        if(toggle == nullptr)
-            return false;
-        bool isOn;
-        isOn = *CRASH_UNLESS(il2cpp_utils::RunMethod<bool>(toggle, "get_isOn"));
-        return isOn;
+    void SetButtonText(Il2CppObject* button, std::string text) {
+        auto* buttonTextObject = RET_V_UNLESS(_getButtonTextObject(button));
+        CRASH_UNLESS(il2cpp_utils::SetPropertyValue(buttonTextObject, "text", il2cpp_utils::createcsstr(text)));
     }
 
-    void SetToggleIsOn(Il2CppObject* toggle, bool isOn){
-        if(toggle == nullptr)
-            return;
-        il2cpp_utils::RunMethod(toggle, "set_isOn", isOn);
+    void SetButtonTextColor(Il2CppObject* button, Color color) {
+        auto* buttonTextObject = _getButtonTextObject(button);
+        CRASH_UNLESS(il2cpp_utils::SetPropertyValue(buttonTextObject, "color", color));
     }
 
-}
+    void SetButtonEnabled(Il2CppObject* button, bool enabled) {
+        CRASH_UNLESS(il2cpp_utils::SetPropertyValue(button, "interactable", enabled));
+    }
+
+    bool GetToggleIsOn(Il2CppObject* toggle) {
+        RET_0_UNLESS(toggle);
+        return CRASH_UNLESS(il2cpp_utils::GetPropertyValue<bool>(toggle, "isOn"));
+    }
+
+    void SetToggleIsOn(Il2CppObject* toggle, bool isOn) {
+        RET_V_UNLESS(toggle);
+        CRASH_UNLESS(il2cpp_utils::SetPropertyValue(toggle, "isOn", isOn));
+    }
+}  // namespace UnityHelper
