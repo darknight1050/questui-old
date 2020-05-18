@@ -42,8 +42,8 @@ namespace UnityHelper {
         return componentsFound;
     }
 
-    Il2CppObject* GetComponentInParent(Il2CppObject* parentObject, Il2CppClass* klass, std::string_view name) {
-        std::vector<Il2CppObject*> componentsFound = GetComponentsInParent(parentObject, klass, name);
+    Il2CppObject* GetComponentInParent(Il2CppObject* parentObject, Il2CppReflectionType* tComp, std::string_view name) {
+        std::vector<Il2CppObject*> componentsFound = GetComponentsInParent(parentObject, tComp, name);
         if (componentsFound.size() > 0) {
             return componentsFound[0];
         }
@@ -66,8 +66,8 @@ namespace UnityHelper {
         return componentsFound;
     }
 
-    Il2CppObject* GetComponentInChildren(Il2CppObject* parentObject, Il2CppClass* klass, std::string_view name) {
-        std::vector<Il2CppObject*> componentsFound = GetComponentsInChildren(parentObject, klass, name);
+    Il2CppObject* GetComponentInChildren(Il2CppObject* parentObject, Il2CppReflectionType* tComp, std::string_view name) {
+        std::vector<Il2CppObject*> componentsFound = GetComponentsInChildren(parentObject, tComp, name);
         if (componentsFound.size() > 0) {
             return componentsFound[0];
         }

@@ -57,8 +57,8 @@ namespace QuestUI {
         UnityHelper::SetButtonEnabled(buttonModsListDown, buttonModsListDownEnabled);
         UnityHelper::SetButtonTextColor(buttonModsListDown, buttonModsListDownEnabled ? textColorEnabled : textColorDisabled);
 
-        auto* buttonMod_Template = UnityHelper::GetComponentInChildren(
-            customUIObject, il2cpp_utils::GetClassFromName("UnityEngine.UI", "Button"), "ButtonMod_Template");
+        auto* tButton = CRASH_UNLESS(il2cpp_utils::GetSystemType("UnityEngine.UI", "Button"));
+        auto* buttonMod_Template = UnityHelper::GetComponentInChildren(customUIObject, tButton, "ButtonMod_Template");
         auto* buttonMod_TemplateTransform = CRASH_UNLESS(il2cpp_utils::GetPropertyValue(buttonMod_Template, "transform"));
         Vector3 buttonMod_TemplateTransformPosition = CRASH_UNLESS(il2cpp_utils::GetPropertyValue<Vector3>(
             buttonMod_TemplateTransform, "localPosition"));
@@ -167,10 +167,9 @@ namespace QuestUI {
         auto* customUITransform = CRASH_UNLESS(il2cpp_utils::GetPropertyValue(customUIObject, "transform"));
         CRASH_UNLESS(il2cpp_utils::RunMethod(customUITransform, "SetParent", menuTransformParent, false));
 
-        buttonModsListUp = UnityHelper::GetComponentInChildren(
-            customUIObject, il2cpp_utils::GetClassFromName("UnityEngine.UI", "Button"), "ButtonModsListUp");
-        buttonModsListDown = UnityHelper::GetComponentInChildren(
-            customUIObject, il2cpp_utils::GetClassFromName("UnityEngine.UI", "Button"), "ButtonModsListDown");
+        auto* tButton = CRASH_UNLESS(il2cpp_utils::GetSystemType("UnityEngine.UI", "Button"));
+        buttonModsListUp = UnityHelper::GetComponentInChildren(customUIObject, tButton, "ButtonModsListUp");
+        buttonModsListDown = UnityHelper::GetComponentInChildren(customUIObject, tButton, "ButtonModsListDown");
 
         UnityHelper::AddButtonOnClick(
             buttonBinder, customUIObject, "ButtonBack", (UnityHelper::ButtonOnClickFunction*)ButtonBackOnClick);
@@ -196,11 +195,9 @@ namespace QuestUI {
 
         log(INFO, "QuestUI: %lu Mods Loaded!", questUIInfo->Mods.size());
 
-        Il2CppObject* buttonMod_Template = UnityHelper::GetComponentInChildren(
-            customUIObject, il2cpp_utils::GetClassFromName("UnityEngine.UI", "Button"), "ButtonMod_Template");
+        Il2CppObject* buttonMod_Template = UnityHelper::GetComponentInChildren(customUIObject, tButton, "ButtonMod_Template");
         UnityHelper::SetGameObjectActive(buttonMod_Template, false);
-        Il2CppObject* panelMod_Template = UnityHelper::GetComponentInChildren(
-            customUIObject, il2cpp_utils::GetClassFromName("UnityEngine", "Object"), "PanelMod_Template");
+        Il2CppObject* panelMod_Template = UnityHelper::GetComponentInChildren(customUIObject, tButton, "PanelMod_Template");
         UnityHelper::SetGameObjectActive(panelMod_Template, false);
 
         for (QuestUIModInfo* modInfo : questUIInfo->Mods) {
@@ -253,10 +250,10 @@ namespace QuestUI {
             menuTransformParent = CRASH_UNLESS(il2cpp_utils::RunMethod(menuTransformParent, "GetParent"));
             menuTransformParent = CRASH_UNLESS(il2cpp_utils::RunMethod(menuTransformParent, "GetParent"));
 
-            modsButton = UnityHelper::GetComponentInChildren(
-                settingsButtonTransformParent, il2cpp_utils::GetClassFromName("UnityEngine.UI", "Button"), "MainMenuModsButton");
-            assetLoaderFinishedButton = UnityHelper::GetComponentInChildren(settingsButtonTransformParent,
-                il2cpp_utils::GetClassFromName("UnityEngine.UI", "Button"), "AssetLoaderFinishedButton");
+            auto* tButton = CRASH_UNLESS(il2cpp_utils::GetSystemType("UnityEngine.UI", "Button"));
+            modsButton = UnityHelper::GetComponentInChildren(settingsButtonTransformParent, tButton, "MainMenuModsButton");
+            assetLoaderFinishedButton = UnityHelper::GetComponentInChildren(
+                settingsButtonTransformParent, tButton, "AssetLoaderFinishedButton");
             if (!modsButton) {
                 loaderInstance = true;
                 modsButton = CRASH_UNLESS(il2cpp_utils::RunMethod("UnityEngine", "Object", "Instantiate", settingsButton));
@@ -274,7 +271,6 @@ namespace QuestUI {
                 UnityHelper::SetGameObjectActive(assetLoaderFinishedButton, false);
             }
             if (loaderInstance) {
-                auto* tButton = il2cpp_utils::GetSystemType("UnityEngine.UI", "Button");
                 menuButtons = CRASH_UNLESS(il2cpp_utils::RunMethod<Array<Il2CppObject*>*>(
                     menuTransformParent, "GetComponentsInChildren", tButton, false));
 

@@ -1,6 +1,7 @@
 #pragma once
+#include "../beatsaber-hook/shared/utils/il2cpp-utils.hpp"
+#include <string_view>
 #include <vector>
-#include "../beatsaber-hook/shared/utils/typedefs.h"
 
 namespace UnityHelper {
 
@@ -8,6 +9,7 @@ namespace UnityHelper {
         Color m_NormalColor;
         Color m_HighlightedColor;
         Color m_PressedColor;
+        Color m_SelectedColor;
         Color m_DisabledColor;
         float m_ColorMultiplier;
 	    float m_FadeDuration;
@@ -19,11 +21,11 @@ namespace UnityHelper {
     Il2CppObject* FindGameObjectWithTag(std::string_view name);
     Il2CppObject* FindGameObject(std::string_view name);
   
-    std::vector<Il2CppObject*> GetComponentsInParent(Il2CppObject* parentObject, Il2CppClass* klass, std::string_view name);
-    Il2CppObject* GetComponentInParent(Il2CppObject* parentObject, Il2CppClass* klass, std::string_view name);
+    std::vector<Il2CppObject*> GetComponentsInParent(Il2CppObject* parentObject, Il2CppReflectionType* tComp, std::string_view name);
+    Il2CppObject* GetComponentInParent(Il2CppObject* parentObject, Il2CppReflectionType* tComp, std::string_view name);
     
-    std::vector<Il2CppObject*> GetComponentsInChildren(Il2CppObject* parentObject, Il2CppClass* klass, std::string_view name);
-    Il2CppObject* GetComponentInChildren(Il2CppObject* parentObject, Il2CppClass* klass, std::string_view name);
+    std::vector<Il2CppObject*> GetComponentsInChildren(Il2CppObject* parentObject, Il2CppReflectionType* tComp, std::string_view name);
+    Il2CppObject* GetComponentInChildren(Il2CppObject* parentObject, Il2CppReflectionType* tComp, std::string_view name);
 
     Il2CppObject* GetGameObject(Il2CppObject* object);
 
@@ -45,3 +47,4 @@ namespace UnityHelper {
     void SetToggleIsOn(Il2CppObject* toggle, bool isOn);
 
 }
+DEFINE_IL2CPP_ARG_TYPE(UnityHelper::ColorBlock, "UnityEngine.UI", "ColorBlock");
