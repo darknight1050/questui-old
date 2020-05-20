@@ -1,10 +1,9 @@
 #pragma once
 #include "../beatsaber-hook/shared/utils/typedefs.h"
-#include "unity-helper.hpp"
 
 namespace QuestUI {
 
-    typedef void VoidFunction(); 
+    typedef void VoidFunction();
 
     struct QuestUIModInfo {
         std::string Name;
