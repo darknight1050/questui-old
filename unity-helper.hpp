@@ -21,6 +21,7 @@ namespace UnityHelper {
     Il2CppObject* FindGameObjectWithTag(std::string_view name);
     Il2CppObject* FindGameObject(std::string_view name);
   
+    // TODO: default tComp to UnityEngine::Object if nullptr is passed?
     std::vector<Il2CppObject*> GetComponentsInParent(Il2CppObject* parentObject, Il2CppReflectionType* tComp, std::string_view name);
     Il2CppObject* GetComponentInParent(Il2CppObject* parentObject, Il2CppReflectionType* tComp, std::string_view name);
     

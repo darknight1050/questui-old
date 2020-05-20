@@ -75,27 +75,27 @@ namespace UnityHelper {
     }
 
     Il2CppObject* GetGameObject(Il2CppObject* object) {
-        RET_0_UNLESS(object);
+        CRASH_UNLESS(object);
         return CRASH_UNLESS(il2cpp_utils::GetPropertyValue(object, "gameObject"));
     }
 
     void DontDestroyOnLoad(Il2CppObject* object) {
-        RET_V_UNLESS(object);
+        CRASH_UNLESS(object);
         CRASH_UNLESS(il2cpp_utils::RunMethod("UnityEngine", "Object", "DontDestroyOnLoad", object));
     }
 
     void SetActive(Il2CppObject* object, bool active) {
-        RET_V_UNLESS(object);
+        CRASH_UNLESS(object);
         CRASH_UNLESS(il2cpp_utils::RunMethod(object, "SetActive", active));
     }
 
     void SetGameObjectActive(Il2CppObject* object, bool active) {
-        Il2CppObject* gameObject = RET_V_UNLESS(GetGameObject(object));
+        Il2CppObject* gameObject = CRASH_UNLESS(GetGameObject(object));
         SetActive(gameObject, active);
     }
 
     Il2CppObject* GetParentTransform(Il2CppObject* object) {
-        RET_0_UNLESS(object);
+        CRASH_UNLESS(object);
         auto* objT = CRASH_UNLESS(il2cpp_utils::GetPropertyValue(object, "transform"));
         return CRASH_UNLESS(il2cpp_utils::RunMethod(objT, "GetParent"));
     }
@@ -127,13 +127,13 @@ namespace UnityHelper {
     }
 
     Il2CppObject* _getButtonTextObject(Il2CppObject* button) {
-        RET_0_UNLESS(button);
+        CRASH_UNLESS(button);
         auto* tTMProUGUI = CRASH_UNLESS(il2cpp_utils::GetSystemType("TMPro", "TextMeshProUGUI"));
         return CRASH_UNLESS(il2cpp_utils::RunMethod(button, "GetComponentInChildren", tTMProUGUI, true));
     }
 
     void SetButtonText(Il2CppObject* button, std::string text) {
-        auto* buttonTextObject = RET_V_UNLESS(_getButtonTextObject(button));
+        auto* buttonTextObject = CRASH_UNLESS(_getButtonTextObject(button));
         CRASH_UNLESS(il2cpp_utils::SetPropertyValue(buttonTextObject, "text", il2cpp_utils::createcsstr(text)));
     }
 
@@ -147,12 +147,12 @@ namespace UnityHelper {
     }
 
     bool GetToggleIsOn(Il2CppObject* toggle) {
-        RET_0_UNLESS(toggle);
+        CRASH_UNLESS(toggle);
         return CRASH_UNLESS(il2cpp_utils::GetPropertyValue<bool>(toggle, "isOn"));
     }
 
     void SetToggleIsOn(Il2CppObject* toggle, bool isOn) {
-        RET_V_UNLESS(toggle);
+        CRASH_UNLESS(toggle);
         CRASH_UNLESS(il2cpp_utils::SetPropertyValue(toggle, "isOn", isOn));
     }
 }  // namespace UnityHelper
